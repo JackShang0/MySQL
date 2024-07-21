@@ -1,13 +1,71 @@
 server:
   port: 5666
 spring:
+  profiles:
+    active: dev
   application:
     name: mysql
   resources:
     add-mappings: false
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource    #当前数据源操作类型
-    driver-class-name: com.mysql.jdbc.Driver   #此处不对哈  mysql驱动包
-    url: jdbc:mysql://localhost:3306/db2022?useUnicode=true&characterEncoding=utf-8&useSSL=false
-    username: root
-    password: root
+  #shardingsphere 的配置  5.1.1版本的配置以下面配置方式为主，官方文档的不对
+  shardingsphere:
+    mode:
+      type: Memory
+    datasource:
+      names: master,slave1,slave2
+      #分别配置三个数据源
+      master:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3307/cluster
+        username: root
+        password: 3307
+      slave1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3308/cluster
+        username: root
+        password: 3308
+      slave2:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3309/cluster
+        username: root
+        password: 3309
+      # 配置其他数据源
+    #读写分离配置
+    rules:
+      readwrite-splitting:
+        data-sources:
+          mds:  #自定义名字  后面如果需要被其他数据源引用
+            type: Static  #服务注册发现 静态获取    Static，Dynamic
+            props:
+                auto-aware-data-source-name: master
+                write-data-source-name: master  #写数据源配置
+                read-data-source-names: slave1,slave2   #读数据源配置
+            load-balancer-name: read-round-robin   #配置读写分离自定义命名
+        load-balancers:
+          read-round-robin:
+            type: ROUND_ROBIN  # 轮询的负载均衡策略
+          read-random:
+            type: RANDOM  # 随机的负载均衡策略
+          read-weight:
+            type: WEIGHT  # 权重的负载均衡策略
+            props:        #配置slave的权重
+              slave1: 1.0
+              slave2: 2.0
+    props:
+      sql-show: true  #是否打印sql
+      sql-simple: true  #打印简单sql
+
+
+
+
+
+
+  #datasource:
+  #  type: com.alibaba.druid.pool.DruidDataSource    #当前数据源操作类型
+  #  driver-class-name: com.mysql.jdbc.Driver   #此处不对哈  mysql驱动包
+  #  url: jdbc:mysql://localhost:3306/db2022?useUnicode=true&characterEncoding=utf-8&useSSL=false
+  #  username: root
+  #  password: root
