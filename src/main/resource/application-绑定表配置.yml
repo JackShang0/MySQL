@@ -1,0 +1,123 @@
+server:
+  port: 5666
+spring:
+  profiles:
+    active: dev
+  application:
+    name: mysql
+  resources:
+    add-mappings: false
+  #shardingsphere 的配置  5.1.1版本的配置以下面配置方式为主，官方文档的不对
+  shardingsphere:
+    mode:
+      type: Memory
+    datasource:
+      #配置数据库垂直分片
+      names: user,item0,item1
+      #分别配置数据源
+      user:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3301/user
+        username: root
+        password: 3301
+      item0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3302/item
+        username: root
+        password: 3302
+      item1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3303/item
+        username: root
+        password: 3303
+    #配置水平分片
+    rules:
+      sharding:
+        tables:
+          #t_user:
+          #  actual-data-nodes: user.t_user
+          t_order:
+            #这样配置会报错，因为没有办法确认将插入语句路由到哪个节点上
+            #actual-data-nodes: item.t_order0,item.t_order1,item2.t_order0,item2.t_order1
+            # actual-data-nodes: ${['item','item2']}.order${0..1}
+            actual-data-nodes: item$->{0..1}.t_order${0..1}   #硬编码，指定表，实现分库策略
+            #配置分库策略
+            database-strategy:
+              #用于单分片键的标准分片场景
+              standard:
+                #分片的路由键：依据哪个字段进行分片
+                sharding-column: user_id
+                #分片算法的名字 更多分片算法查看 https://shardingsphere.apache.org/document/5.1.1/cn/user-manual/shardingsphere-jdbc/builtin-algorithm/sharding/
+                sharding-algorithm-name: user_hashMod   #此处使用行表达式分片算法
+            #配置分表策略
+            table-strategy:
+              standard:
+                sharding-column: order_no       #根据order_no字段进行hash取模的分表策略
+                sharding-algorithm-name: user_hashMod
+            #分布式序列策略配置
+            key-generate-strategy:    #主键生成侧露
+              column: id    #主键列
+              key-generator-name: snowflake   #策略算法名称（推荐使用雪花算法）
+
+          #配置关联表
+          #TODO 配置关联表的分库分表策略和order表一致，就可以使得order和order_item的数据在同一个数据库，可以避免跨库关联
+          t_order_item:
+            actual-data-nodes: item$->{0..1}.t_order_item${0..1}
+            #配置分库策略
+            database-strategy:
+              #用于单分片键的标准分片场景
+              standard:
+                #分片的路由键：依据哪个字段进行分片
+                sharding-column: user_id
+                #分片算法的名字 更多分片算法查看 https://shardingsphere.apache.org/document/5.1.1/cn/user-manual/shardingsphere-jdbc/builtin-algorithm/sharding/
+                sharding-algorithm-name: user_hashMod   #此处使用行表达式分片算法
+            #配置分表策略
+            table-strategy:
+              standard:
+                sharding-column: order_no       #根据order_no字段进行hash取模的分表策略
+                sharding-algorithm-name: user_hashMod
+            #分布式序列策略配置
+            key-generate-strategy:    #主键生成侧露
+              column: id    #主键列
+              key-generator-name: snowflake   #策略算法名称（推荐使用雪花算法）
+
+        #通过shardingsphere配置雪花算法id
+        key-generators:
+          snowflake:
+            type: SNOWFLAKE
+            #props:    #如果当前使用雪花算法的是分片值，则需要配置，当前使用的id不是分片值，因此不需要配置
+        #配置上面需要使用的分片算法
+        sharding-algorithms:
+          #分片算法名称
+          user_inline:
+            type: INLINE    #行表达式
+            #分片算法规则
+            props:
+              algorithm-expression: item$->{user_id % 2}
+          user_mod:
+            type: MOD       #取模
+            props:
+              sharding-count: 2   #用user_id字段对分片数量取模。配置效果与上面的行表达式一样
+          user_hashMod:
+            type: HASH_MOD       #取模
+            props:
+              sharding-count: 2
+
+        #绑定表配置，为了减少分库分表多表关联查询的查询次数
+        binding-tables[0]: t_order,t_order_item
+
+
+
+    props:
+      sql-show: true  #是否打印sql
+      sql-simple: true  #打印简单sql
+
+#mybatis-plus的sql日志
+logging:
+  level:
+    com.baomidou.mybatisplus: info
+    # 或者更精确地定位到SQL打印
+    your.mapper.package: info
