@@ -2,9 +2,11 @@ package com.mysql.shardingSphere;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mysql.shardingSphere.dto.TbDict;
 import com.mysql.shardingSphere.dto.TbOrder;
 import com.mysql.shardingSphere.dto.TbOrderItem;
 import com.mysql.shardingSphere.dto.TbUser;
+import com.mysql.shardingSphere.mapper.TbDictMapper;
 import com.mysql.shardingSphere.mapper.TbOrderItemMapper;
 import com.mysql.shardingSphere.mapper.TbOrderMapper;
 import com.mysql.shardingSphere.mapper.TbUserMapper;
@@ -31,6 +33,9 @@ public class ShardingTest {
 
     @Resource
     TbOrderItemMapper orderItemMapper;
+
+    @Resource
+    TbDictMapper dictMapper;
 
 
     /**
@@ -212,6 +217,28 @@ public class ShardingTest {
         System.out.println("data count ->"+orderAmount.size());
         for (OrderItemVo tbOrder : orderAmount) {
             System.out.println(tbOrder);
+        }
+    }
+
+
+    /**
+     * 广播表插入数据
+     */
+    @Test
+    public void insertBroadcast(){
+        dictMapper.insert(new TbDict().setDictType("汉族"));
+    }
+
+
+    /**
+     * 广播表查询数据
+     */
+    @Test
+    public void selectBroadcast(){
+        List<TbDict> tbDicts = dictMapper.selectList(null);
+        System.out.println("size ->"+tbDicts.size());
+        for (TbDict tbDict : tbDicts) {
+            System.out.println(tbDict);
         }
     }
 }

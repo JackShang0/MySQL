@@ -84,6 +84,14 @@ spring:
               column: id    #主键列
               key-generator-name: snowflake   #策略算法名称（推荐使用雪花算法）
 
+          #配置广播表
+          t_dict:
+            actual-data-nodes: item$->{0..1}.t_dict${0..1},user.t_dict
+            #分布式序列策略配置
+            key-generate-strategy:    #主键生成侧露
+              column: id    #主键列
+              key-generator-name: snowflake   #策略算法名称（推荐使用雪花算法）
+
         #通过shardingsphere配置雪花算法id
         key-generators:
           snowflake:
@@ -105,6 +113,13 @@ spring:
             type: HASH_MOD       #取模
             props:
               sharding-count: 2
+
+        #绑定表配置，为了减少分库分表多表关联查询的查询次数
+        binding-tables[0]: t_order,t_order_item
+
+        #广播表配置，为了优化字典表
+        broadcast-tables[0]: t_dict
+
     props:
       sql-show: true  #是否打印sql
       sql-simple: true  #打印简单sql
