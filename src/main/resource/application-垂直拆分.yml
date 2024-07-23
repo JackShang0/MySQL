@@ -1,0 +1,40 @@
+server:
+  port: 5666
+spring:
+  profiles:
+    active: dev
+  application:
+    name: mysql
+  resources:
+    add-mappings: false
+  #shardingsphere 的配置  5.1.1版本的配置以下面配置方式为主，官方文档的不对
+  shardingsphere:
+    mode:
+      type: Memory
+    datasource:
+      #配置数据库垂直分片
+      names: user,item
+      #分别配置数据源
+      user:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3301/user
+        username: root
+        password: 3301
+      item:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3302/item
+        username: root
+        password: 3302
+    #配置垂直分库  指定数据库表的真实访问地址
+    rules:
+      sharding:
+        tables:
+          t_user:
+            actual-data-nodes: user.t_user
+          t_order:
+            actual-data-nodes: item.t_order
+    props:
+      sql-show: true  #是否打印sql
+      sql-simple: true  #打印简单sql
