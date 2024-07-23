@@ -3,15 +3,19 @@ package com.mysql.shardingSphere;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mysql.shardingSphere.dto.TbOrder;
+import com.mysql.shardingSphere.dto.TbOrderItem;
 import com.mysql.shardingSphere.dto.TbUser;
+import com.mysql.shardingSphere.mapper.TbOrderItemMapper;
 import com.mysql.shardingSphere.mapper.TbOrderMapper;
 import com.mysql.shardingSphere.mapper.TbUserMapper;
+import com.mysql.shardingSphere.vo.OrderItemVo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 @SpringBootTest
@@ -24,6 +28,9 @@ public class ShardingTest {
 
     @Resource
     TbUserMapper userMapper;
+
+    @Resource
+    TbOrderItemMapper orderItemMapper;
 
 
     /**
@@ -164,4 +171,47 @@ public class ShardingTest {
         }
     }
 
+
+    /**
+     * 测试关联表插入，可以将关联表以相同规则插入到相同的数据库中
+     */
+    @Test
+    public void testOrder_Item_insert(){
+
+        for (int i = 0; i < 5; i++) {
+            TbOrder tbOrder = new TbOrder().setUserId(1L).setOrderNo("order" + i);
+            orderMapper.insert(tbOrder);
+
+            for (int j = 0; j < 4; j++) {
+                TbOrderItem tbOrderItem = new TbOrderItem().setUserId(1L).setOrderNo("order" + i)
+                        .setPrice(new BigDecimal(100)).setCount(99);
+                orderItemMapper.insert(tbOrderItem);
+            }
+        }
+
+
+        for (int i = 5; i < 10; i++) {
+            TbOrder tbOrder = new TbOrder().setUserId(2L).setOrderNo("order" + i);
+            orderMapper.insert(tbOrder);
+
+            for (int j = 0; j < 4; j++) {
+                TbOrderItem tbOrderItem = new TbOrderItem().setUserId(2L).setOrderNo("order" + i)
+                        .setPrice(new BigDecimal(100)).setCount(99);
+                orderItemMapper.insert(tbOrderItem);
+            }
+        }
+    }
+
+
+    /**
+     * 分库分表 多表关联查询
+     */
+    @Test
+    public void selectOrderItemVo(){
+        List<OrderItemVo> orderAmount = orderItemMapper.getOrderAmount();
+        System.out.println("data count ->"+orderAmount.size());
+        for (OrderItemVo tbOrder : orderAmount) {
+            System.out.println(tbOrder);
+        }
+    }
 }
