@@ -1,0 +1,80 @@
+server:
+  port: 5666
+spring:
+  profiles:
+    active: dev
+  application:
+    name: mysql
+  resources:
+    add-mappings: false
+  #shardingsphere 的配置  5.1.1版本的配置以下面配置方式为主，官方文档的不对
+  shardingsphere:
+    mode:
+      type: Memory
+    datasource:
+      #配置数据库垂直分片
+      names: user,item0,item1
+      #分别配置数据源
+      user:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3301/user
+        username: root
+        password: 3301
+      item0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3302/item
+        username: root
+        password: 3302
+      item1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3303/item
+        username: root
+        password: 3303
+    #配置水平分片
+    rules:
+      sharding:
+        tables:
+          #t_user:
+          #  actual-data-nodes: user.t_user
+          t_order:
+            #这样配置会报错，因为没有办法确认将插入语句路由到哪个节点上
+            #actual-data-nodes: item.t_order0,item.t_order1,item2.t_order0,item2.t_order1
+            # actual-data-nodes: ${['item','item2']}.order${0..1}
+            actual-data-nodes: item$->{0..1}.t_order${0..1}   #硬编码，指定表，实现分库策略
+            #配置分片侧露
+            database-strategy:
+              #用于单分片键的标准分片场景
+              standard:
+                #分片的路由键：依据哪个字段进行分片
+                sharding-column: user_id
+                #分片算法的名字 更多分片算法查看 https://shardingsphere.apache.org/document/5.1.1/cn/user-manual/shardingsphere-jdbc/builtin-algorithm/sharding/
+                sharding-algorithm-name: user_hashMod   #此处使用行表达式分片算法
+            key-generate-strategy:    #主键生成侧露
+              column: id    #主键列
+              key-generator-name: snowflake   #策略算法名称（推荐使用雪花算法）
+            table-strategy:
+              standard:
+                sharding-column: order_no       #根据order_no字段进行hash取模的分表策略
+                sharding-algorithm-name: user_hashMod
+        #配置上面需要使用的分片算法
+        sharding-algorithms:
+          #分片算法名称
+          user_inline:
+            type: INLINE    #行表达式
+            #分片算法规则
+            props:
+              algorithm-expression: item$->{user_id % 2}
+          user_mod:
+            type: MOD       #取模
+            props:
+              sharding-count: 2   #用user_id字段对分片数量取模。配置效果与上面的行表达式一样
+          user_hashMod:
+            type: HASH_MOD       #取模
+            props:
+              sharding-count: 2
+    props:
+      sql-show: true  #是否打印sql
+      sql-simple: true  #打印简单sql
