@@ -9,4 +9,7 @@
         六、InnoDB存储引擎
         七、MySQL数据管理
         八、基于ShardingSphere的MySQL分库分表
+            8.1 基于shardingsphere-jdbc的分库分表
+            8.2 基于shardingsphere-proxy的分库分表
+            <需注意，使用shardingsphere-proxy的时候要把pom中shardingsphere-jdbc的依赖注释掉>
 +--------------------------------------------------------------+
