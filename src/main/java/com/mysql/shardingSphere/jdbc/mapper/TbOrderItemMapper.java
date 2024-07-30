@@ -1,9 +1,8 @@
-package com.mysql.shardingSphere.mapper;
+package com.mysql.shardingSphere.jdbc.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.mysql.shardingSphere.dto.TbOrder;
-import com.mysql.shardingSphere.dto.TbOrderItem;
-import com.mysql.shardingSphere.vo.OrderItemVo;
+import com.mysql.shardingSphere.jdbc.dto.TbOrderItem;
+import com.mysql.shardingSphere.jdbc.vo.OrderItemVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 

@@ -1,4 +1,4 @@
-package com.mysql.shardingSphere.dto;
+package com.mysql.shardingSphere.jdbc.dto;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

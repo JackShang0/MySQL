@@ -1,8 +1,7 @@
-package com.mysql.shardingSphere.mapper;
+package com.mysql.shardingSphere.jdbc.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.mysql.shardingSphere.dto.TbDict;
-import com.mysql.shardingSphere.dto.TbUser;
+import com.mysql.shardingSphere.jdbc.dto.TbDict;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
