@@ -1,0 +1,77 @@
+server:
+  port: 5666
+spring:
+  profiles:
+    active: dev
+  application:
+    name: mysql
+  resources:
+    add-mappings: false
+  #时间分片的配置
+  shardingsphere:
+    rules:
+      sharding:
+        # 自动分片表规则配置
+        auto-tables:
+          t_order:
+            actual-data-sources: db$->{0..1}
+            sharding-strategy:
+              standard:
+                sharding-column: order_date
+                sharding-algorithm-name: t_order_table_auto_interval
+        # 分片算法定义
+        sharding-algorithms:
+          # 自动时间段分片算法
+          t_order_table_auto_interval:
+            type: AUTO_INTERVAL
+            props:
+              datetime-lower: '2023-01-01 00:00:00' # 分片的起始时间范围，时间戳格式：yyyy-MM-dd HH:mm:ss
+              datetime-upper: '2025-01-01 00:00:00' #  分片的结束时间范围，时间戳格式：yyyy-MM-dd HH:mm:ss
+              sharding-seconds: 31536000 # 单一分片所能承载的最大时间，单位：秒，允许分片键的时间戳格式的秒带有时间精度，但秒后的时间精度会被自动抹去
+        tables:
+          # 逻辑表名称
+          t_order:
+            # 数据节点：数据库.分片表
+            actual-data-nodes: db$->{0..1}.t_order_${0..2}
+            # 分库策略
+            database-strategy:
+              standard:
+                sharding-column: order_date
+                sharding-algorithm-name: t_order_table_auto_interval
+            # 分表策略
+  #            table-strategy:
+  #              standard:
+  #                sharding-column: order_date
+  #                sharding-algorithm-name: t_order_table_auto_interval
+
+
+  #shardingsphere:
+  #  mode:
+  #    type: Memory
+  #  datasource:
+  #    names: master,slave1,slave2
+  #    #分别配置三个数据源
+  #    master:
+  #      type: com.zaxxer.hikari.HikariDataSource
+  #      driver-class-name: com.mysql.jdbc.Driver
+  #      url: jdbc:mysql://localhost:3307/cluster
+  #      username: root
+  #      password: 3307
+  #shardingsphere proxy的配置  与配置mysql一样
+  #datasource:
+  #  type: com.zaxxer.hikari.HikariDataSource
+  #  driver-class-name: com.mysql.jdbc.Driver
+  #  url: jdbc:mysql://localhost:3321/readwrite_splitting_db   #数据库名是配置文件中配置
+  #  username: root
+  #  password: root
+
+
+#mybatis-plus的sql日志
+logging:
+  level:
+    com.baomidou.mybatisplus: info
+    # 或者更精确地定位到SQL打印
+    your.mapper.package: info
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   #输出日志到控制台
