@@ -1,0 +1,112 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+######################################################################################################
+#
+# Here you can configure the rules for the proxy.
+# This example is configuration of replica-query rule.
+#
+######################################################################################################
+#
+#schemaName: readwrite_splitting_db
+#
+#dataSources:
+#  primary_ds:
+#    url: jdbc:postgresql://127.0.0.1:5432/demo_primary_ds
+#    username: postgres
+#    password: postgres
+#    connectionTimeoutMilliseconds: 30000
+#    idleTimeoutMilliseconds: 60000
+#    maxLifetimeMilliseconds: 1800000
+#    maxPoolSize: 50
+#    minPoolSize: 1
+#  replica_ds_0:
+#    url: jdbc:postgresql://127.0.0.1:5432/demo_replica_ds_0
+#    username: postgres
+#    password: postgres
+#    connectionTimeoutMilliseconds: 30000
+#    idleTimeoutMilliseconds: 60000
+#    maxLifetimeMilliseconds: 1800000
+#    maxPoolSize: 50
+#    minPoolSize: 1
+#  replica_ds_1:
+#    url: jdbc:postgresql://127.0.0.1:5432/demo_replica_ds_1
+#    username: postgres
+#    password: postgres
+#    connectionTimeoutMilliseconds: 30000
+#    idleTimeoutMilliseconds: 60000
+#    maxLifetimeMilliseconds: 1800000
+#    maxPoolSize: 50
+#    minPoolSize: 1
+#
+#rules:
+#- !READWRITE_SPLITTING
+#  dataSources:
+#    readwrite_ds:
+#      type: Static
+#      props:
+#        write-data-source-name: primary_ds
+#        read-data-source-names: replica_ds_0,replica_ds_1
+
+######################################################################################################
+#
+# If you want to connect to MySQL, you should manually copy MySQL driver to lib directory.
+#
+######################################################################################################
+
+#mysql的数据库配置 schemaName是proxy代理数据库的名称
+schemaName: readwrite_splitting_db
+
+#数据库配置就选择之前主从分离的3307、3308、3309三台mysql服务器
+dataSources:
+  write_ds:
+    url: jdbc:mysql://138.54.254.88:3307/cluster?serverTimezone=UTC&useSSL=false
+    username: root
+    password: 3307
+    connectionTimeoutMilliseconds: 30000
+    idleTimeoutMilliseconds: 60000
+    maxLifetimeMilliseconds: 1800000
+    maxPoolSize: 50
+    minPoolSize: 1
+  read_ds_0:
+    url: jdbc:mysql://138.54.254.88:3308/cluster?serverTimezone=UTC&useSSL=false
+    username: root
+    password: 3308
+    connectionTimeoutMilliseconds: 30000
+    idleTimeoutMilliseconds: 60000
+    maxLifetimeMilliseconds: 1800000
+    maxPoolSize: 50
+    minPoolSize: 1
+  read_ds_1:
+    url: jdbc:mysql://138.54.254.88:3309/cluster?serverTimezone=UTC&useSSL=false
+    username: root
+    password: 3309
+    connectionTimeoutMilliseconds: 30000
+    idleTimeoutMilliseconds: 60000
+    maxLifetimeMilliseconds: 1800000
+    maxPoolSize: 50
+    minPoolSize: 1
+
+#配置读写分离
+rules:
+  - !READWRITE_SPLITTING
+    dataSources:
+      readwrite_ds:
+        type: Static
+        props:
+          write-data-source-name: write_ds
+          read-data-source-names: read_ds_0,read_ds_1
