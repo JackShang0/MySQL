@@ -1,16 +1,10 @@
-package com.mysql.shardingSphere;
+package com.mysql.shardingSphere.jdbc;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.mysql.shardingSphere.dto.TbDict;
-import com.mysql.shardingSphere.dto.TbOrder;
-import com.mysql.shardingSphere.dto.TbOrderItem;
-import com.mysql.shardingSphere.dto.TbUser;
-import com.mysql.shardingSphere.mapper.TbDictMapper;
-import com.mysql.shardingSphere.mapper.TbOrderItemMapper;
-import com.mysql.shardingSphere.mapper.TbOrderMapper;
-import com.mysql.shardingSphere.mapper.TbUserMapper;
-import com.mysql.shardingSphere.vo.OrderItemVo;
+import com.mysql.shardingSphere.jdbc.dto.*;
+import com.mysql.shardingSphere.jdbc.mapper.*;
+import com.mysql.shardingSphere.jdbc.vo.OrderItemVo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +16,7 @@ import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class ShardingTest {
+public class JdbcShardingTest {
 
 
     @Resource

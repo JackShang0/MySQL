@@ -1,7 +1,7 @@
-package com.mysql.shardingSphere;
+package com.mysql.shardingSphere.jdbc;
 
-import com.mysql.shardingSphere.dto.TbItem;
-import com.mysql.shardingSphere.mapper.TbItemMapper;
+import com.mysql.shardingSphere.jdbc.dto.TbItem;
+import com.mysql.shardingSphere.jdbc.mapper.TbItemMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class ReadWriteTest {
+public class JdbcReadWriteTest {
 
     @Resource
     TbItemMapper tbItemMapper;

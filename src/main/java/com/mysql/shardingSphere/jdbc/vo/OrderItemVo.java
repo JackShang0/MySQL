@@ -1,4 +1,4 @@
-package com.mysql.shardingSphere.vo;
+package com.mysql.shardingSphere.jdbc.vo;
 
 import lombok.Data;
 import java.math.BigDecimal;
